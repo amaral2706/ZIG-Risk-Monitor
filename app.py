@@ -28,6 +28,9 @@ import plotly.express as px
 import streamlit as st
 
 from modules.auth import ensure_authenticated
+if not ensure_authenticated():
+    st.stop()
+
 from modules.data_loader import (
     _parse_timestamp_column,
     date_column_for_period_filter,
@@ -50,8 +53,6 @@ from modules.ui import (
     format_currency_columns,
     render_metabase_pipeline_bar,
 )
-
-
 def _metodo_pagamento_bucket(raw: object) -> str:
     """
     Classifica bucket de método no mesmo espírito do risk_engine (PIX = texto contém 'PIX').
