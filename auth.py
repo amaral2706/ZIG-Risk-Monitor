@@ -33,3 +33,5 @@ def ensure_authenticated():
     if "username" not in st.session_state:
         st.warning("Faça login para acessar esta página.")
         st.stop()
+
+update deploy
