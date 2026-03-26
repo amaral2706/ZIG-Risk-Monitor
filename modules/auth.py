@@ -1,36 +1,66 @@
 import streamlit as st
+import json
+import os
 
-ADMIN_USERS = {
-    "bruna",
-    "bruna pinto",
-    "bruna amaral",
-    "bruna.amaral",
-    "brunaamaral",
-}
+USERS_FILE = "usuarios.json"
 
-def normalize_username(username: str) -> str:
-    return " ".join(username.strip().lower().split())
+def carregar_usuarios():
+    if not os.path.exists(USERS_FILE):
+        return {}
+    with open(USERS_FILE, "r") as f:
+        return json.load(f)
 
-def is_admin(username: str) -> bool:
-    normalized = normalize_username(username)
-    if normalized in ADMIN_USERS:
-        return True
-    return normalized.startswith("bruna ") or normalized.startswith("bruna.")
+def salvar_usuarios(usuarios):
+    with open(USERS_FILE, "w") as f:
+        json.dump(usuarios, f)
 
-def login_form() -> None:
-    with st.form("login_form", clear_on_submit=False):
-        username = st.text_input("Usuario", placeholder="Digite seu usuario (ex.: bruna)")
-        submitted = st.form_submit_button("Entrar")
-        if submitted:
-            if not username.strip():
-                st.error("Informe um usuario valido.")
-                return
-            st.session_state["username"] = normalize_username(username)
-            st.session_state["username_display"] = username.strip()
-            st.rerun()
+def criar_usuario(nome, email, senha):
+    usuarios = carregar_usuarios()
+    if email in usuarios:
+        return False
+    usuarios[email] = {"nome": nome, "senha": senha}
+    salvar_usuarios(usuarios)
+    return True
+
+def autenticar(email, senha):
+    usuarios = carregar_usuarios()
+    return email in usuarios and usuarios[email]["senha"] == senha
+
 
 def ensure_authenticated():
-    if "username" not in st.session_state:
-        st.warning("Faça login para acessar esta página.")
-        st.stop()
 
+    if "logado" not in st.session_state:
+        st.session_state.logado = False
+
+    if st.session_state.logado:
+        return True
+
+    opcao = st.radio("Acesso", ["Login", "Criar conta"])
+
+    if opcao == "Login":
+        st.title("Login")
+
+        email = st.text_input("Email")
+        senha = st.text_input("Senha", type="password")
+
+        if st.button("Entrar"):
+            if autenticar(email, senha):
+                st.session_state.logado = True
+                st.rerun()
+            else:
+                st.error("Email ou senha inválidos")
+
+    else:
+        st.title("Criar conta")
+
+        nome = st.text_input("Nome")
+        email = st.text_input("Email")
+        senha = st.text_input("Senha", type="password")
+
+        if st.button("Cadastrar"):
+            if criar_usuario(nome, email, senha):
+                st.success("Conta criada com sucesso")
+            else:
+                st.error("Email já cadastrado")
+
+    return False
