@@ -1,6 +1,5 @@
 import streamlit as st
 
-
 ADMIN_USERS = {
     "bruna",
     "bruna pinto",
@@ -9,18 +8,14 @@ ADMIN_USERS = {
     "brunaamaral",
 }
 
-
 def normalize_username(username: str) -> str:
     return " ".join(username.strip().lower().split())
-
 
 def is_admin(username: str) -> bool:
     normalized = normalize_username(username)
     if normalized in ADMIN_USERS:
         return True
-    # Flexibiliza para variacoes como "bruna.sobrenome" ou "bruna sobrenome".
     return normalized.startswith("bruna ") or normalized.startswith("bruna.")
-
 
 def login_form() -> None:
     with st.form("login_form", clear_on_submit=False):
@@ -34,9 +29,7 @@ def login_form() -> None:
             st.session_state["username_display"] = username.strip()
             st.rerun()
 
-
-def ensure_authenticated() -> bool:
+def ensure_authenticated():
     if "username" not in st.session_state:
-        st.warning("Faca login na tela inicial (`app.py`) para acessar esta pagina.")
-        return False
-    return True
+        st.warning("Faça login para acessar esta página.")
+        st.stop()
