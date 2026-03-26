@@ -1,0 +1,48 @@
+from pathlib import Path
+import sys
+
+import streamlit as st
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))
+
+from modules.auth import ensure_authenticated, is_admin
+from modules.data_loader import load_raw_data, save_uploaded_file
+from modules.feature_engineering import add_features
+from modules.risk_engine import calcular_score
+from modules.ui import apply_enterprise_theme
+
+
+st.set_page_config(page_title="Admin Upload | ZIG Risk Monitor", page_icon=":inbox_tray:", layout="wide")
+if not ensure_authenticated():
+    st.stop()
+
+apply_enterprise_theme()
+st.title("Admin Upload")
+username = st.session_state.get("username", "")
+shown_user = st.session_state.get("username_display", username)
+st.caption(f"Usuario atual: {shown_user}")
+if not is_admin(username):
+    st.error("Apenas o administrador `bruna` pode enviar planilhas.")
+    if st.button("Trocar usuario"):
+        st.session_state.pop("username", None)
+        st.session_state.pop("username_display", None)
+        st.switch_page("app.py")
+    st.stop()
+
+st.write("Envie arquivo CSV ou XLSX contendo as colunas obrigatorias.")
+uploaded = st.file_uploader("Planilha de saques", type=["csv", "xlsx"])
+
+if st.button("Salvar arquivo enviado", disabled=uploaded is None):
+    ok, message = save_uploaded_file(uploaded)
+    if not ok:
+        st.error(message)
+    else:
+        st.success(message)
+        data = load_raw_data()
+        processed = calcular_score(add_features(data))
+        processed.to_csv("data/processed/saques_processado.csv", index=False)
+        st.success("Dados processados e salvos em data/processed/saques_processado.csv")
+
+st.caption("Caminho final do upload: data/uploaded/saques.csv")
