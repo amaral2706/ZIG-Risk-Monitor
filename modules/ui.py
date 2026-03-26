@@ -812,7 +812,11 @@ def render_metabase_pipeline_bar() -> None:
             if st.button("Executar agora", type="primary", width="stretch", key="pipeline_run"):
                 if not metabase_ok:
                     st.session_state["pipeline_status"] = "error"
-                    st.session_state["pipeline_message"] = "Metabase não configurado. Configure METABASE_URL e METABASE_CARD_ID no .env (pasta zig_risk_monitor)."
+                    st.session_state["pipeline_message"] = (
+                        "Metabase não configurado. Defina METABASE_URL e METABASE_CARD_ID (e credenciais) "
+                        "em variáveis de ambiente: no Streamlit Community Cloud use **App settings → Secrets**; "
+                        "localmente use o arquivo `.env` na pasta do app."
+                    )
                     st.session_state["pipeline_rows"] = 0
                     _save_pipeline_status_to_file()
                     st.rerun()
