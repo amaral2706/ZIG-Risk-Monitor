@@ -121,3 +121,10 @@ def parse_timestamp_series(series: pd.Series) -> pd.Series:
 
     parsed = [_parse_scalar(v) for v in series]
     return pd.to_datetime(pd.Series(parsed, index=series.index), errors="coerce", utc=True)
+
+def get_brt_now():
+    """Retorna o datetime atual no fuso horário de Brasília."""
+    from datetime import datetime
+    import pytz
+    return datetime.now(pytz.timezone("America/Sao_Paulo"))
+
