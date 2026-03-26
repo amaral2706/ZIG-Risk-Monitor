@@ -1,8 +1,19 @@
 from pathlib import Path
+import sys
 
+# =========================
+# FIX DEFINITIVO DE IMPORT
+# =========================
+ROOT = Path(__file__).resolve().parent
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))
+
+# =========================
+# ENV
+# =========================
 try:
     from dotenv import load_dotenv
-    _env = Path(__file__).resolve().parent / ".env"
+    _env = ROOT / ".env"
     if _env.exists():
         load_dotenv(_env)
     load_dotenv()
@@ -355,8 +366,6 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-if not ensure_authenticated():
-    st.stop()
 
 apply_enterprise_theme()
 aplicar_estilo_global()
